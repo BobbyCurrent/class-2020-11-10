@@ -41,7 +41,22 @@ week_10 <- kenya %>%
 
 * Write a sentence or two describing a situation in which RMSE would not be a good metric for choosing among models.
 
+```{r sc1}
 
+fit_obj <- stan_glm(data = week_10,
+         formula = reg_chg ~ treatment + poverty_n + treatment * poverty_n,
+         family = gaussian(),
+         refresh = 0)
+
+print(fit_obj, digits = 5)
+
+
+tibble(truth = week_10$reg_chg, forecast = predict(fit_obj)) %>%
+  mutate(sq_diff = (forecast - truth)^2) %>%
+  summarize(rmse = sqrt(mean(sq_diff)))
+
+```
+Sigma is the difference between the actual values and the predicted values. It is pretty much the error term.
 
 
 ## Scene 2
@@ -52,6 +67,20 @@ week_10 <- kenya %>%
 
 * Calculate RMSE using the metrics() argument.
 
+```{r}
+workflow() %>%
+  add_model(linear_reg() %>% 
+              set_engine("lm") %>% 
+              set_mode("regression")) %>%
+  add_recipe(recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built, 
+                    data = ames_train)) %>%
+    step_log(Gr_Liv_Area, base = 10) %>% 
+    step_other(Neighborhood, threshold = 0.01) %>% 
+    step_dummy(all_nominal())
+
+
+
+```
 
 
 ## Scene 3
